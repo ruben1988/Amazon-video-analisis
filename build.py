@@ -46,6 +46,24 @@ def check_bucket_exists(bucketname):
             exists = False
     return exists
 
+def create_bucket(src_s3_bucket_name, region_name, s3_client):
+    if( not check_bucket_exists(src_s3_bucket_name)):
+        print("Bucket %s not found. Creating in region %s." % (src_s3_bucket_name, region_name))
+
+        if( region_name == "us-east-1"):
+            s3_client.create_bucket(
+                # ACL="authenticated-read",
+                Bucket=src_s3_bucket_name
+            )
+        else:
+            s3_client.create_bucket(
+                #ACL="authenticated-read",
+                Bucket=src_s3_bucket_name,
+                CreateBucketConfiguration={
+                    "LocationConstraint": region_name
+                }
+            )
+
 @task()
 def clean():
     '''Clean build directory.'''
@@ -111,6 +129,7 @@ def deploylambda(* functions, **kwargs):
 
     cfn_params_dict = read_json(cfn_params_path)
     src_s3_bucket_name = cfn_params_dict["SourceS3BucketParameter"]
+    src_s3_video_bucket = cfn_params_dict["VideoProcessorS3Bucket"]
     s3_keys["framefetcher"] = cfn_params_dict["FrameFetcherSourceS3KeyParameter"]
     s3_keys["imageprocessor"] = cfn_params_dict["ImageProcessorSourceS3KeyParameter"]
 
@@ -118,22 +137,8 @@ def deploylambda(* functions, **kwargs):
     
     print("Checking if S3 Bucket '%s' exists..." % (src_s3_bucket_name))
 
-    if( not check_bucket_exists(src_s3_bucket_name)):
-        print("Bucket %s not found. Creating in region %s." % (src_s3_bucket_name, region_name))
-
-        if( region_name == "us-east-1"):
-            s3_client.create_bucket(
-                # ACL="authenticated-read",
-                Bucket=src_s3_bucket_name
-            )
-        else:
-            s3_client.create_bucket(
-                #ACL="authenticated-read",
-                Bucket=src_s3_bucket_name,
-                CreateBucketConfiguration={
-                    "LocationConstraint": region_name
-                }
-            )
+    create_bucket(src_s3_bucket_name, region_name, s3_client)
+    create_bucket(src_s3_video_bucket, region_name, s3_client)
 
     for function in functions:
         
@@ -141,6 +146,27 @@ def deploylambda(* functions, **kwargs):
         
         with open('build/%s.zip' % (function), 'rb') as data:
             s3_client.upload_fileobj(data, src_s3_bucket_name, s3_keys[function])
+    
+    return
+
+@task()
+def uploadVideo(*direc, **kwargs):
+    '''Upload video to s3 bucket.'''
+
+    print (direc)
+    direction=direc[0]
+    cfn_params_path = kwargs.get("cfn_params_path", "config/cfn-params.json")
+    cfn_params_dict = read_json(cfn_params_path)
+    src_s3_video_bucket = cfn_params_dict["VideoProcessorS3Bucket"]
+    s3_client = boto3.client("s3")
+    
+    s3_keys = "src/video1.avi"
+
+
+    print "Uploading video '%s' to '%s'" % (direction, s3_keys)
+        
+    with open(direction, 'rb') as data:
+        s3_client.upload_fileobj(data, src_s3_video_bucket, s3_keys)
     
     return
 
