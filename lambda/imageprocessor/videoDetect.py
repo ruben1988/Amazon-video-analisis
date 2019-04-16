@@ -9,9 +9,9 @@ import sys
 class VideoDetect:
     jobId = ''
     rek = boto3.client('rekognition')
-    queueUrl = 'https://sqs.us-east-1.amazonaws.com/318089925419/queuStandar'
-    roleArn = 'arn:aws:iam::318089925419:role/videoDetecPrueba'
-    topicArn = 'arn:aws:sns:us-east-1:318089925419:AmazonRekognition'
+    queueUrl = ''
+    roleArn = ''
+    topicArn = ''
     bucket = 'videopruebas12'
     video = 'Bond.mp4'
 
@@ -19,7 +19,7 @@ class VideoDetect:
 
         jobFound = False
         sqs = boto3.client('sqs')
-       
+
 
         #=====================================
         response = self.rek.start_label_detection(Video={'S3Object': {'Bucket': self.bucket, 'Name': self.video}},
