@@ -9,10 +9,10 @@ class VideoDetect:
     queueUrl = ''
     topicArn = ''
     bucket = 'videopruebas12'
-    video = 'Bond.mp4'
+    video = 'basketball.mp4'
 
     def main(self,arg):
-        if (arg[1] == "label"):
+        if (arg[1] == "label" or arg[1] == "position"):
             self.rek.start_label_detection(Video={'S3Object': {'Bucket': self.bucket, 'Name': self.video}},
                                                   NotificationChannel={'RoleArn': self.roleArn,
                                                                        'SNSTopicArn': self.topicArn})
@@ -37,6 +37,8 @@ class VideoDetect:
                 #=============================================
                 if (arg[1] == "label"):
                     self.GetResultsLabels(rekMessage['JobId'])
+                if (arg[1] == "position"):
+                    self.GetResultsBoundingBox(rekMessage['JobId'])
                 if (arg[1] == "celeb"):
                     self.GetResultsCelebrities(rekMessage['JobId'])
                 #=============================================
@@ -44,7 +46,7 @@ class VideoDetect:
                 sqs.delete_message(QueueUrl=self.queueUrl,
                                ReceiptHandle=message['ReceiptHandle'])
 
-    def GetResultsLabels(self, jobId):
+    def GetResultsBoundingBox(self, jobId):
         maxResults = 10
         paginationToken = ''
         finished = False
@@ -57,16 +59,15 @@ class VideoDetect:
                                             NextToken=paginationToken,
                                             SortBy='TIMESTAMP')
 
-            '''print("Codec: ", response['VideoMetadata']['Codec'])
-            print("DurationMillis: ", str(response['VideoMetadata']['DurationMillis']))
-            print("Format: ", response['VideoMetadata']['Format'])
-            print("FrameRate: ", response['VideoMetadata']['FrameRate'])'''
-
             for labelDetection in response['Labels']:
-                if (labelDetection['Label']['Name'] =="Gun"):
+                if (labelDetection['Label']['Name'] =="Person"):
                     print("\n")
                     print("Label Name: ", labelDetection['Label']['Name'])
                     print("Label Confidence: ", labelDetection['Label']['Confidence'])
+                    print("People Detected on a frame: ")
+                    for instance in labelDetection['Label']['Instances']:
+                        print("Person Detected in position: ")
+                        print(instance['BoundingBox'])
                     print("Label Timestamp: ",str(labelDetection['Timestamp']))
                     print("\n")
 
@@ -95,6 +96,37 @@ class VideoDetect:
                       str(celebrityRecognition['Celebrity']['Name']))
                 print('Timestamp: ' + str(celebrityRecognition['Timestamp']))
                 print()
+
+            if 'NextToken' in response:
+                paginationToken = response['NextToken']
+            else:
+                finished = True
+
+    def GetResultsLabels(self, jobId):
+        maxResults = 10
+        paginationToken = ''
+        finished = False
+
+        print("Label detection: \n")
+
+        while finished == False:
+            response = self.rek.get_label_detection(JobId=jobId,
+                                                    MaxResults=maxResults,
+                                                    NextToken=paginationToken,
+                                                    SortBy='TIMESTAMP')
+
+            '''print("Codec: ", response['VideoMetadata']['Codec'])
+            print("DurationMillis: ", str(response['VideoMetadata']['DurationMillis']))
+            print("Format: ", response['VideoMetadata']['Format'])
+            print("FrameRate: ", response['VideoMetadata']['FrameRate'])'''
+
+            for labelDetection in response['Labels']:
+                if (labelDetection['Label']['Name'] == "Gun"):
+                    print("\n")
+                    print("Label Name: ", labelDetection['Label']['Name'])
+                    print("Label Confidence: ", labelDetection['Label']['Confidence'])
+                    print("Label Timestamp: ", str(labelDetection['Timestamp']))
+                    print("\n")
 
             if 'NextToken' in response:
                 paginationToken = response['NextToken']
