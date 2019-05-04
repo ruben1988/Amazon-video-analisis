@@ -22,8 +22,8 @@ def write_dir_to_zip(src, zf):
         for filename in files:
             absname = os.path.abspath(os.path.join(dirname, filename))
             arcname = absname[len(abs_src) + 1:]
-            print 'zipping %s as %s' % (os.path.join(dirname, filename),
-                                        arcname)
+            print ('zipping %s as %s' % (os.path.join(dirname, filename),
+                                        arcname))
             zf.write(absname, arcname)
 
 def read_json(jsonf_path):
@@ -67,7 +67,7 @@ def create_bucket(src_s3_bucket_name, region_name, s3_client):
 @task()
 def clean():
     '''Clean build directory.'''
-    print 'Cleaning build directory...'
+    print ('Cleaning build directory...')
     
     if os.path.exists('build'):
     	shutil.rmtree('build')
@@ -86,7 +86,7 @@ def packagelambda(* functions):
         functions = ("framefetcher", "imageprocessor")
 
     for function in functions:
-        print 'Packaging "%s" lambda function in directory' % function
+        print ('Packaging "%s" lambda function in directory' % function)
         zipf = zipfile.ZipFile("%s.zip" % function, "w", zipfile.ZIP_DEFLATED)
         
         write_dir_to_zip("../lambda/%s/" % function, zipf)
@@ -142,7 +142,7 @@ def deploylambda(* functions, **kwargs):
 
     for function in functions:
         
-        print "Uploading function '%s' to '%s'" % (function, s3_keys[function])
+        print ("Uploading function '%s' to '%s'" % (function, s3_keys[function]))
         
         with open('build/%s.zip' % (function), 'rb') as data:
             s3_client.upload_fileobj(data, src_s3_bucket_name, s3_keys[function])
@@ -163,7 +163,7 @@ def uploadVideo(*direc, **kwargs):
     s3_keys = "src/video1.avi"
 
 
-    print "Uploading video '%s' to '%s'" % (direction, s3_keys)
+    print ("Uploading video '%s' to '%s'" % (direction, s3_keys))
         
     with open(direction, 'rb') as data:
         s3_client.upload_fileobj(data, src_s3_video_bucket, s3_keys)
@@ -252,7 +252,7 @@ def updatestack(**kwargs):
 
         print("Stack UPDATED in approximately %d secs." % int(time.time() - start_t))
     except ClientError as e:
-        print "EXCEPTION: " + e.response["Error"]["Message"]
+        print ("EXCEPTION: " + e.response["Error"]["Message"])
 
 @task()
 def stackstatus(global_params_path="config/global-params.json"):
@@ -271,7 +271,7 @@ def stackstatus(global_params_path="config/global-params.json"):
             print("Stack '%s' has the status '%s'" % (stack_name, response["Stacks"][0]["StackStatus"]))
     
     except ClientError as e:
-        print "EXCEPTION: " + e.response["Error"]["Message"]
+        print ("EXCEPTION: " + e.response["Error"]["Message"])
 
 
 @task()
@@ -331,7 +331,7 @@ def webui(webdir="web-ui/", global_params_path="config/global-params.json", cfn_
         shutil.rmtree(web_build_dir)
 
     # Copy web-ui source
-    print "Copying Web UI source from '%s' to build directory." % webdir
+    print ("Copying Web UI source from '%s' to build directory." % webdir)
     shutil.copytree(webdir, web_build_dir)
 
     global_params_dict = read_json(global_params_path)
@@ -344,7 +344,7 @@ def webui(webdir="web-ui/", global_params_path="config/global-params.json", cfn_
 
 
     # Get Rest API Id
-    print "Retrieving API key from stack '%s'." % stack_name
+    print ("Retrieving API key from stack '%s'." % stack_name)
     response = cfn_client.describe_stack_resource(
         StackName=stack_name,
         LogicalResourceId=cfn_params_dict["ApiGatewayRestApiNameParameter"]
@@ -371,11 +371,11 @@ def webui(webdir="web-ui/", global_params_path="config/global-params.json", cfn_
 
     region_name = boto3.session.Session().region_name
 
-    print "Putting together the API Gateway base URL."
+    print ("Putting together the API Gateway base URL.")
     
     api_base_url = "https://%s.execute-api.%s.amazonaws.com/%s" % (rest_api_id, region_name, api_stage_name)
 
-    print "Writing API key and API base URL to apigw.js in '%ssrc/'" % web_build_dir
+    print ("Writing API key and API base URL to apigw.js in '%ssrc/'" % web_build_dir)
 
     # Output key value and invoke url to apigw.js
     apigw_js = open('%ssrc/apigw.js' % web_build_dir, 'w')
@@ -395,7 +395,7 @@ def webuiserver(webdir="web-ui/",port=8080):
 
     httpd = SocketServer.TCPServer(("0.0.0.0", port), Handler)
 
-    print "Starting local Web UI Server in directory '%s' on port %s" % (web_build_dir, port)
+    print ("Starting local Web UI Server in directory '%s' on port %s" % (web_build_dir, port))
     
     httpd.serve_forever()
     
