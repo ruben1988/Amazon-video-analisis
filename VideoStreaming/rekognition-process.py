@@ -1,7 +1,5 @@
-import boto3
-import json
-import argparse
-import sys
+import boto3, botocore, json, argparse, sys
+
 
 parser = argparse.ArgumentParser(description='video stream processor helper for face recognition')
 parser.add_argument('-c', '--create', action='store_true', help='create video stream processor')
@@ -29,45 +27,59 @@ def createStreamProcessorHelper(streamProcessor, kinesisVideoStreamName, kinesis
 
 
 def createStreamProcessor(streamProcessor, kinesisVideoStreamArn, kinesisDataStreamArn, collectionId, roleArn):
-    response = rekClient.create_stream_processor(
-        Input={
-            'KinesisVideoStream': {
-                'Arn': kinesisVideoStreamArn
-            }
-        },
-        Output={
-            'KinesisDataStream': {
-                'Arn': kinesisDataStreamArn
-            }
-        },
-        Name=streamProcessor,
-        Settings={
-            'FaceSearch': {
-                'CollectionId': collectionId,
-                'FaceMatchThreshold': 70.0
-            }
-        },
-        RoleArn=roleArn
-    )
-    print(response)
+    try:
+        response = rekClient.create_stream_processor(
+            Input={
+                'KinesisVideoStream': {
+                    'Arn': kinesisVideoStreamArn
+                }
+            },
+            Output={
+                'KinesisDataStream': {
+                    'Arn': kinesisDataStreamArn
+                }
+            },
+            Name=streamProcessor,
+            Settings={
+                'FaceSearch': {
+                    'CollectionId': collectionId,
+                    'FaceMatchThreshold': 70.0
+                }
+            },
+            RoleArn=roleArn
+        )
+        print(response)
+
+    except botocore.exceptions.ClientError as e:
+        print ("Error: {0}".format(e))
 
 def startStreamProcessor(streamProcessor):
-    response = rekClient.start_stream_processor(
-        Name=streamProcessor
-    )
-    print(response)
+    try:
+        response = rekClient.start_stream_processor(
+            Name=streamProcessor
+        )
+        print(response)
+
+    except botocore.exceptions.ClientError as e:
+        print ("Error: {0}".format(e))
 
 def stopStreamProcess(streamProcessor):
-    response = rekClient.stop_stream_processor(
-        Name=streamProcessor
-    )
-    print(response)
+    try:
+        response = rekClient.stop_stream_processor(
+            Name=streamProcessor
+        )
+        print(response)
+    except botocore.exceptions.ClientError as e:
+        print ("Error: {0}".format(e))
 
 def delStreamProcess(streamProcessor):
-    response = rekClient.delete_stream_processor(
-        Name=streamProcessor
-    )
-    print(response)
+    try:
+        response = rekClient.delete_stream_processor(
+            Name=streamProcessor
+        )
+        print(response)
+    except botocore.exceptions.ClientError as e:
+        print ("Error: {0}".format(e))
 
 if __name__ == '__main__':
     if len(sys.argv)==1:
