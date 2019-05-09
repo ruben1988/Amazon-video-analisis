@@ -47,7 +47,7 @@ def encode_and_send_frame(frame, frame_count, enable_kinesis=True, enable_rekog=
 
         #put encoded image in kinesis stream
         if enable_kinesis:
-            print "Sending image to Kinesis"
+            print ("Sending image to Kinesis")
             response = kinesis_client.put_record(
                 StreamName="FrameStream",
                 Data=cPickle.dumps(frame_package),
@@ -63,10 +63,10 @@ def encode_and_send_frame(frame, frame_count, enable_kinesis=True, enable_rekog=
                 MaxLabels=rekog_max_labels,
                 MinConfidence=rekog_min_conf
             )
-            print response
+            print (response)
 
     except Exception as e:
-        print e
+        print (e)
 
 
 def main():
@@ -89,7 +89,7 @@ def main():
             break
 
         if frame_count % capture_rate == 0:
-            result = pool.apply_async(encode_and_send_frame, (frame, frame_count, True, True, False,))
+            result = pool.apply_async(encode_and_send_frame, (frame, frame_count, True, False, False,))
 
         frame_count += 1
 
