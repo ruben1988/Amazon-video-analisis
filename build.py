@@ -70,7 +70,7 @@ def clean():
     print ('Cleaning build directory...')
     
     if os.path.exists('build'):
-    	shutil.rmtree('build')
+        shutil.rmtree('build')
     
     os.mkdir('build')
 
