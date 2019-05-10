@@ -1,0 +1,8 @@
+{
+  "region": "eu-west-1",
+  "snsTopicRekognitionName": "snsRekognitionV",
+  "sqsRekognitionName": "sqsRekognitionV",
+  "iamRole": "videoDetecPrueba",
+  "iamPolicy": "",
+  "bucketName": "videobucketanalisisruben"
+}
