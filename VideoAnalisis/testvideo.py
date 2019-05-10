@@ -2,14 +2,15 @@ import boto3
 import json
 import sys
 
+
 class VideoDetect:
     jobId = ''
-    rek = boto3.client('rekognition')
+    rek = boto3.client('rekognition', region_name='eu-west-1')
     roleArn = ''
     queueUrl = ''
     topicArn = ''
-    bucket = 'videopruebas12'
-    video = 'basketball.mp4'
+    bucket = ''
+    video = ''
 
     def main(self,arg):
         if (arg[1] == "label" or arg[1] == "position"):
@@ -17,12 +18,11 @@ class VideoDetect:
                                                   NotificationChannel={'RoleArn': self.roleArn,
                                                                        'SNSTopicArn': self.topicArn})
         if (arg[1] == "celeb"):
-            print("Hola")
             self.rek.start_celebrity_recognition(Video={'S3Object': {'Bucket': self.bucket, 'Name': self.video}},
                                                             NotificationChannel={'RoleArn': self.roleArn,
                                                                                  'SNSTopicArn': self.topicArn})
 
-        sqs = boto3.client('sqs')
+        sqs = boto3.client('sqs', region_name='eu-west-1')
 
 
         sqsResponse = sqs.receive_message(QueueUrl=self.queueUrl, MessageAttributeNames=['ALL'],
