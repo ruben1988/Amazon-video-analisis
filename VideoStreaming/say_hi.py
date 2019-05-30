@@ -3,6 +3,7 @@ import subprocess
 import time
 from contextlib import closing
 
+
 def say_hi(name):
     client = boto3.client('polly', region_name='eu-west-1')
     response = client.synthesize_speech(
@@ -16,15 +17,17 @@ def say_hi(name):
         with closing(response["AudioStream"]) as stream:
             data = stream.read()
             fo = open(name + ".mp3", "w+")
-            fo.write( data )
+            fo.write(data)
             fo.close()
-            time.sleep(0.5)
+            #time.sleep(0.5)
             # play the sound
             play(name + ".mp3")
+
 
 def play(fname):
     # play the sound
     subprocess.call(["afplay", fname])
+
 
 if __name__ == '__main__':
     name = sys.argv[1]

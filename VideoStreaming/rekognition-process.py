@@ -19,7 +19,7 @@ def createStreamProcessorHelper(streamProcessor, kinesisVideoStreamName, kinesis
     kvClient = boto3.client('kinesisvideo', region_name=region)
     kinesisVideoStreamArn = kvClient.describe_stream(StreamName=kinesisVideoStreamName)['StreamInfo']['StreamARN']
 
-    #kinesisVideoStreamArn ="arn:aws:kinesisvideo:us-west-2:318089925419:stream/appVideoStream-videoFaceRek/1556876387219"
+
     kinesisDataStreamArn = 'arn:aws:kinesis:' + region + ':' + accountID + ':stream/' + kinesisDataStream
     roleArn = 'arn:aws:iam::' + accountID + ':role/' + iamRole
     #roleArn = "arn:aws:iam::318089925419:role/appRole-videoFaceRek"
@@ -48,6 +48,7 @@ def createStreamProcessor(streamProcessor, kinesisVideoStreamArn, kinesisDataStr
             },
             RoleArn=roleArn
         )
+        print("Stream Processor: ")
         print(response)
 
     except botocore.exceptions.ClientError as e:
@@ -58,6 +59,7 @@ def startStreamProcessor(streamProcessor):
         response = rekClient.start_stream_processor(
             Name=streamProcessor
         )
+        print("Stream Processor Start: ")
         print(response)
 
     except botocore.exceptions.ClientError as e:
