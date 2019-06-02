@@ -35,8 +35,8 @@ def encode_and_send_frame(frame, frame_count, enable_kinesis=True, enable_rekog=
 
         frame_package = {
             'ApproximateCaptureTime' : now_ts_utc,
-            'FrameCount' : frame_count,
-            'ImageBytes' : img_bytes
+            'FrameCount': frame_count,
+            'ImageBytes': img_bytes
         }
 
         if write_file:
@@ -47,7 +47,7 @@ def encode_and_send_frame(frame, frame_count, enable_kinesis=True, enable_rekog=
 
         #put encoded image in kinesis stream
         if enable_kinesis:
-            print ("Sending image to Kinesis")
+            print("Sending image to Kinesis")
             response = kinesis_client.put_record(
                 StreamName="FrameStream",
                 Data=cPickle.dumps(frame_package),

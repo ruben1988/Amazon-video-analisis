@@ -63,11 +63,13 @@ cap = cv2.VideoCapture(0)
 
 while True:
 
-
 	ret, frame = cap.read()
 	cap.set(3, FRAME_WIDTH)
 	cap.set(4, FRAME_HEIGHT)
-	image=frame
+	image = frame
+
+	if ret is False:
+		break
 
 	# draw the text and timestamp on the frame
 	tsz = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
@@ -87,12 +89,11 @@ while True:
 				for faceSearchResponse in data['FaceSearchResponse']:
 					print("Detectando caras")
 					boundingBox = faceSearchResponse['DetectedFace']['BoundingBox']
-					width = boundingBox.get('Width')
-					height = boundingBox.get('Height')
-					left = boundingBox.get('Left')
-					top = boundingBox.get('Top')
-					image = draw_bounding_box(frame, FRAME_WIDTH, FRAME_HEIGHT, width, height, top, left, (255, 0, 0))
 
+					cv2.rectangle(frame,(int(boundingBox['Left'] * FRAME_WIDTH),int(boundingBox['Top'] * FRAME_HEIGHT)),
+							(int((boundingBox['Left'] + boundingBox['Width']) * FRAME_WIDTH),
+							int((boundingBox['Top'] + boundingBox['Height']) * FRAME_HEIGHT)),
+							(255, 0, 0), 2)
 					if len(faceSearchResponse['MatchedFaces']) > 0:
 						print('match faces: %d' % len(faceSearchResponse['MatchedFaces']))
 						#print("Texto o json de MatchedFaces")

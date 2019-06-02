@@ -15,7 +15,7 @@ if __name__ == '__main__':
     filename = sys.argv[1]
     who = sys.argv[2]
 
-    print "Going for image: %s name:%s" % (filename, who)
+    print ("Going for image: %s name:%s" % (filename, who))
     image_file = open(filename, "rb")
     resp = client.index_faces(
         Image={
@@ -24,4 +24,4 @@ if __name__ == '__main__':
         CollectionId=collectionId,
         ExternalImageId=who
     )
-    print resp
+    print (resp)
