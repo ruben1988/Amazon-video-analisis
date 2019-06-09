@@ -3,9 +3,10 @@ import boto3
 
 # Setup
 scale_factor = .15
-green = (0,255,0)
-red = (0,0,255)
+green = (0, 255, 0)
+red = (0, 0, 255)
 frame_thickness = 2
+
 cap = cv2.VideoCapture(0)
 rekognition = boto3.client('rekognition')
 
