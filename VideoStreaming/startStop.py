@@ -9,6 +9,7 @@ parser.add_argument('-d', '--delete', action='store_true', help='delete SNS, kin
 def createSNSTopic(snsTopicName):
     try:
         response = clientsns.create_topic(Name=snsTopicName)
+        print("SNS Topic: ")
         print(response)
     except botocore.exceptions.ClientError as e:
         print("Error: {0}".format(e))
@@ -17,6 +18,7 @@ def createSNSTopic(snsTopicName):
 def createVideoStream(kinesisVideoStreamName):
     try:
         respone = clientVideo.create_stream(StreamName=kinesisVideoStreamName)
+        print("Kinesis Video Stream: ")
         print(respone)
     except botocore.exceptions.ClientError as e:
         print("Error: {0}".format(e))
@@ -27,6 +29,7 @@ def createDataStream(kinesisDataStreamName):
         response = clientKinesis.create_stream(
             StreamName=kinesisDataStreamName,
             ShardCount=1)
+        print("Kinesis Data Stream: ")
         print(response)
     except botocore.exceptions.ClientError as e:
         print("Error: {0}".format(e))

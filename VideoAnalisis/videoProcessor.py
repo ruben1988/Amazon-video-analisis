@@ -4,7 +4,8 @@ import boto3, json, sys, argparse, time
 parser = argparse.ArgumentParser(description='video analisis with rekognition')
 parser.add_argument('-l', '--label', action='store_true', help='label video analisis')
 parser.add_argument('-c', '--celebrity', action='store_true', help='celebrity video analisis')
-parser.add_argument('-p', '--position', action='store_true', help='person bounding box analisis')
+parser.add_argument('-b', '--position', action='store_true', help='person bounding box analisis')
+parser.add_argument('-p', '--person', action='store_true', help='person Tracking analisis')
 
 
 class VideoDetect:
@@ -35,6 +36,11 @@ class VideoDetect:
 
         jobFound = False
 
+        if arg.person:
+            response=self.rek.start_person_tracking(Video={'S3Object': {'Bucket': self.bucket, 'Name': self.video}},
+                                                  NotificationChannel={'RoleArn': self.roleArn,
+                                                                       'SNSTopicArn': self.topicArn})
+
         if arg.label or arg.position:
             response=self.rek.start_label_detection(Video={'S3Object': {'Bucket': self.bucket, 'Name': self.video}},
                                                   NotificationChannel={'RoleArn': self.roleArn,
@@ -64,12 +70,13 @@ class VideoDetect:
                 #print(sqsResponse)
                 #print("Waiting for connection")
                 if 'Messages' not in sqsResponse:
-                    if dotLine < 20:
+                    if dotLine < 30:
                         #print('.')
                         dotLine = dotLine + 1
                     else:
-                        print("sorry waiting for connection")
+                        print("sorry waiting ...")
                         dotLine = 0
+                        print(sqsResponse)
                     sys.stdout.flush()
                     continue
                 else:
@@ -89,6 +96,8 @@ class VideoDetect:
                             self.GetResultsLabels(rekMessage['JobId'])
                         if (arg.position):
                             self.GetResultsBoundingBox(rekMessage['JobId'])
+                        if (arg.person):
+                            self.GetResultsPersonTracking(rekMessage['JobId'])
                         if (arg.celebrity):
                             self.GetResultsCelebrities(rekMessage['JobId'])
                         #=============================================
@@ -135,12 +144,39 @@ class VideoDetect:
             else:
                 finished = True
 
+    def GetResultsPersonTracking(self, jobId):
+        maxResults = 10
+        paginationToken = ''
+        finished = False
+        print("Person Tracking: \n")
+        while finished == False:
+            response = self.rek.get_person_tracking(JobId=jobId,
+                                                          MaxResults=maxResults,
+                                                          NextToken=paginationToken,
+                                                            SortBy='TIMESTAMP')
+
+            print(response['VideoMetadata']['Codec'])
+            print(str(response['VideoMetadata']['DurationMillis']))
+            print(response['VideoMetadata']['Format'])
+            print(response['VideoMetadata']['FrameRate'])
+
+            for personRecognition in response['Persons']:
+                print('Person Index: ' +
+                      str(personRecognition['Person']['Index']))
+                print('Timestamp: ' + str(personRecognition['Timestamp']))
+                print('BoundingBox: ' + str(personRecognition['Person']['BoundingBox']))
+
+            if 'NextToken' in response:
+                paginationToken = response['NextToken']
+            else:
+                finished = True
 
     def GetResultsCelebrities(self, jobId):
         maxResults = 10
         paginationToken = ''
         finished = False
         print("Celebrity detection: \n")
+
         while finished == False:
             response = self.rek.get_celebrity_recognition(JobId=jobId,
                                                           MaxResults=maxResults,
