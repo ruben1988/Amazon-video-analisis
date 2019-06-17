@@ -1,6 +1,6 @@
 #! /usr/bin/python
 import boto3, time, subprocess, sys, json, cv2
-import datetime
+import datetime, time
 
 foundedNames = []
 
@@ -73,7 +73,9 @@ while True:
 
 	# draw the text and timestamp on the frame
 	tsz = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+	tsz = "Local: " + tsz
 	cv2.putText(image, tsz, (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
+	localTimeUnix = time.time()
 
 
 	try:
@@ -84,8 +86,13 @@ while True:
 			if len(data['FaceSearchResponse']) > 0:
 				#print(data['InputInformation']['KinesisVideo']['ServerTimestamp'])
 				print('detect faces: %d' % len(data['FaceSearchResponse']))
-				timestamp=str(data['InputInformation']['KinesisVideo']['ServerTimestamp'])
-				cv2.putText(image, timestamp, (10, frame.shape[0] - 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1)
+				timestampAmazon=data['InputInformation']['KinesisVideo']['ServerTimestamp']
+				timestamp=str(datetime.datetime.utcfromtimestamp(timestampAmazon).strftime('%Y-%m-%d %H:%M:%S'))
+				timestamp = "Amazon: " + timestamp
+				cv2.putText(image, timestamp, (10, frame.shape[0] - 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
+				diferenceTimestamp= str(timestampAmazon - localTimeUnix)
+				diferenceTimestamp = "Diff Timestamp: " + diferenceTimestamp
+				cv2.putText(image, diferenceTimestamp, (10, frame.shape[0] - 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
 				for faceSearchResponse in data['FaceSearchResponse']:
 					print("Detectando caras")
 					boundingBox = faceSearchResponse['DetectedFace']['BoundingBox']

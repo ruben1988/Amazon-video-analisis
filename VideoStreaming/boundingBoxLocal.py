@@ -21,7 +21,7 @@ while(True):
     ret, buf = cv2.imencode('.jpg', small)
 
     # Detect faces in jpg
-    faces = rekognition.detect_faces(Image={'Bytes':buf.tobytes()}, Attributes=['ALL'])
+    faces = rekognition.detect_faces(Image={'Bytes': buf.tobytes()}, Attributes=['ALL'])
 
     # Draw rectangle around faces
     for face in faces['FaceDetails']:
