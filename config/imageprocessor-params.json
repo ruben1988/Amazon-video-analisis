@@ -1,5 +1,5 @@
 {
-	"s3_bucket" : "imagenescamaraframes",
+	"s3_bucket" : "camaraframes",
 	"s3_key_frames_root" : "frames/",
 
 	"ddb_table" : "EnrichedFrame",
@@ -7,10 +7,10 @@
 	"rekog_max_labels" : 123,
     "rekog_min_conf" : 50.0,
 
-	"label_watch_list" : ["Human", "Pet", "Bag", "Toy"],
+	"label_watch_list" : ["Pet", "Bag", "Toy", "Gun", "Phone"],
 	"label_watch_min_conf" : 90.0,
-	"label_watch_phone_num" : "",
+	"label_watch_phone_num" : "+34620686398",
     "label_watch_sns_topic_arn" : "",
-
-	"timezone" : "US/Eastern"
+	"region": "eu-west-1",
+	"timezone" : "Europe/Dublin"
 }

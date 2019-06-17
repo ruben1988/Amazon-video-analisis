@@ -38,14 +38,16 @@ def convert_ts(ts, config):
 
 def process_image(event, context):
 
-    #Initialize clients
-    rekog_client = boto3.client('rekognition')
-    sns_client = boto3.client('sns')
-    s3_client = boto3.client('s3')
-    dynamodb = boto3.resource('dynamodb')
-
-    #Load config
+    # Load config
     config = load_config()
+    region = config['region']
+    #Initialize clients
+    rekog_client = boto3.client('rekognition',region_name=region)
+    sns_client = boto3.client('sns', region_name=region)
+    s3_client = boto3.client('s3')
+    dynamodb = boto3.resource('dynamodb', region_name=region)
+
+
 
     s3_bucket = config["s3_bucket"]
     s3_key_frames_root = config["s3_key_frames_root"]

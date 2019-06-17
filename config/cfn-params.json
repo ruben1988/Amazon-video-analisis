@@ -1,9 +1,8 @@
 {
-    "SourceS3BucketParameter" : "instruccioneslambda",
-    "VideoProcessorS3Bucket": "videorecipiente",
+    "SourceS3BucketParameter" : "lambdainstrucciones",
     "ImageProcessorSourceS3KeyParameter" : "src/lambda_imageprocessor.zip",
     "FrameFetcherSourceS3KeyParameter" : "src/lambda_framefetcher.zip",
-    "FrameS3BucketNameParameter" : "imagenescamaraframes",
+    "FrameS3BucketNameParameter" : "camaraframes",
     "FrameFetcherApiResourcePathPart" : "enrichedframe",
     "ApiGatewayRestApiNameParameter" : "VidAnalyzerRestApi",
     "ApiGatewayStageNameParameter": "development",

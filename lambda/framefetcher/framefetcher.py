@@ -86,8 +86,8 @@ def fetch_frames(event, context):
             s3_presigned_url = s3_client.generate_presigned_url(
                 ClientMethod='get_object',
                 Params={
-                    'Bucket' : s3_bucket,
-                    'Key' : s3_key
+                    'Bucket': s3_bucket,
+                    'Key': s3_key
                 },
                 ExpiresIn=s3_presigned_url_expiry
             )
@@ -97,6 +97,7 @@ def fetch_frames(event, context):
         print (ddb_resp)
 
         return respond(None, ddb_resp["Items"])
+
 
 def handler(event, context):
     return fetch_frames(event, context)

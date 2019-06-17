@@ -34,7 +34,7 @@ def encode_and_send_frame(frame, frame_count, enable_kinesis=True, enable_rekog=
         now_ts_utc = (utc_dt - datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)).total_seconds()
 
         frame_package = {
-            'ApproximateCaptureTime' : now_ts_utc,
+            'ApproximateCaptureTime': now_ts_utc,
             'FrameCount': frame_count,
             'ImageBytes': img_bytes
         }
@@ -47,13 +47,12 @@ def encode_and_send_frame(frame, frame_count, enable_kinesis=True, enable_rekog=
 
         #put encoded image in kinesis stream
         if enable_kinesis:
-            print("Sending image to Kinesis")
             response = kinesis_client.put_record(
                 StreamName="FrameStream",
                 Data=cPickle.dumps(frame_package),
                 PartitionKey="partitionkey"
             )
-            #print response
+            print (response)
 
         if enable_rekog:
             response = rekog_client.detect_labels(

@@ -50,19 +50,21 @@ def create_bucket(src_s3_bucket_name, region_name, s3_client):
     if( not check_bucket_exists(src_s3_bucket_name)):
         print("Bucket %s not found. Creating in region %s." % (src_s3_bucket_name, region_name))
 
-        if( region_name == "us-east-1"):
-            s3_client.create_bucket(
-                # ACL="authenticated-read",
-                Bucket=src_s3_bucket_name
-            )
+        if (region_name == "us-east-1"):
+            try:
+                s3_client.create_bucket(
+                    # ACL="authenticated-read",
+                    Bucket=src_s3_bucket_name
+                )
+            except botocore.exceptions.ClientError as e:
+                print("Error: {0}".format(e))
         else:
-            s3_client.create_bucket(
-                #ACL="authenticated-read",
-                Bucket=src_s3_bucket_name,
-                CreateBucketConfiguration={
-                    "LocationConstraint": region_name
-                }
-            )
+            try:
+                response = s3_client.create_bucket(Bucket=src_s3_bucket_name,
+                                                   CreateBucketConfiguration={'LocationConstraint': region_name})
+                print(response)
+            except botocore.exceptions.ClientError as e:
+                print("Error: {0}".format(e))
 
 @task()
 def clean():
@@ -129,7 +131,8 @@ def deploylambda(* functions, **kwargs):
 
     cfn_params_dict = read_json(cfn_params_path)
     src_s3_bucket_name = cfn_params_dict["SourceS3BucketParameter"]
-    src_s3_video_bucket = cfn_params_dict["VideoProcessorS3Bucket"]
+    #src_s3_video_bucket = cfn_params_dict["VideoProcessorS3Bucket"]
+    #region_name = cfn_params_dict["region"]
     s3_keys["framefetcher"] = cfn_params_dict["FrameFetcherSourceS3KeyParameter"]
     s3_keys["imageprocessor"] = cfn_params_dict["ImageProcessorSourceS3KeyParameter"]
 
@@ -138,7 +141,7 @@ def deploylambda(* functions, **kwargs):
     print("Checking if S3 Bucket '%s' exists..." % (src_s3_bucket_name))
 
     create_bucket(src_s3_bucket_name, region_name, s3_client)
-    create_bucket(src_s3_video_bucket, region_name, s3_client)
+    #create_bucket(src_s3_video_bucket, region_name, s3_client)
 
     for function in functions:
         
@@ -182,17 +185,18 @@ def createstack(**kwargs):
     stack_name = global_params_dict["StackName"]
 
     cfn_params_dict = read_json(cfn_params_path)
+    region_name = boto3.session.Session().region_name
     cfn_params = []
     for key, value in cfn_params_dict.iteritems():
         cfn_params.append({
-            'ParameterKey' : key,
-            'ParameterValue' : value
+            'ParameterKey': key,
+            'ParameterValue': value
             })
 
     cfn_file = open(cfn_path, 'r')
     cfn_template = cfn_file.read(51200) #Maximum size of a cfn template
 
-    cfn_client = boto3.client('cloudformation')
+    cfn_client = boto3.client('cloudformation', region_name=region_name)
 
     print("Attempting to CREATE '%s' stack using CloudFormation." % (stack_name))
     start_t = time.time()

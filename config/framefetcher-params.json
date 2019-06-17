@@ -3,7 +3,7 @@
 
     "ddb_table" : "EnrichedFrame",
     "ddb_gsi_name" : "processed_year_month-processed_timestamp-index",
-
+    "region" : "eu-west-1",
     "fetch_horizon_hrs" : 24,
     "fetch_limit" : 3
 }
